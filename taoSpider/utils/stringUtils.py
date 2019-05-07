@@ -1,6 +1,7 @@
 '''
 专门处理字符串相关的工作
 '''
+import requests
 
 
 def cookie_str2dict(cookie_str):
@@ -23,3 +24,8 @@ def cookie_str2dict(cookie_str):
         cookie_dick[cookie[:index]] = cookie[index + 1:]
 
     return cookie_dick
+
+
+def cookie_str2jar(cookie_str):
+    cookie_dict = cookie_str2dict(cookie_str)
+    return requests.utils.cookiejar_from_dict(cookie_dict)
