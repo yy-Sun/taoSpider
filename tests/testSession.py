@@ -3,7 +3,7 @@
 '''
 
 import requests
-from taoSpider.utils import stringUtils
+from taoSpider import stringUtils
 
 try:
     from lxml import etree

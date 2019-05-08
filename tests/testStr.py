@@ -1,5 +1,5 @@
 str_test = "1er=eafji=fds=".strip()
-from taoSpider.utils import stringUtils
+from taoSpider import stringUtils
 
 index = str_test.index('=')
 print(index)
