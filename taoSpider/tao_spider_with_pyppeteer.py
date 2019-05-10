@@ -36,13 +36,32 @@ async def main():
     await page.setViewport({'width': width, 'height': height})
 
     await page.goto(
-        'https://shop136813853.taobao.com/category.htm?spm=a1z10.1-c.w4010-12442053236.2.4f993705PohR5j&search=y')
+        'https://shop34504620.taobao.com/search.htm?spm=a1z10.1-c-s.0.0.269b7465iuYHfT&search=y')
     await page.evaluateOnNewDocument('() =>{ Object.defineProperties(navigator,'
                                      '{ webdriver:{ get: () => false } }) }')
     sum = {'num': 0}
     while True:
-        # await page.evaluate("window.scrollBy(0, document.body.scrollHeight)")
-        time.sleep(1.7)
+        await page.evaluate("""
+            (function () {
+                var y = document.body.scrollTop;
+                var step = 100;
+                window.scroll(0, y);
+                function f() {
+                    if (y < document.body.scrollHeight) {
+                        y += step;
+                        window.scroll(0, y);
+                        setTimeout(f, 50);
+                    }
+                    else {
+                        window.scroll(0, y);
+                        document.title += "scroll-done";
+                    }
+                }
+                setTimeout(f, 1000);
+                })();
+            """)
+        # await page.evaluate('window.scrollTo(0, document.documentElement.clientHeight);')
+        await asyncio.sleep(4)
 
         # title = await  page.xpath('')
         item = {}
@@ -58,23 +77,30 @@ async def main():
             sum['num'] = sum['num'] + 1
             # price_str = await page.evaluate('(element) => element.textContent', price)
             print("..................................")
+        try:
+            await asyncio.sleep(3)
+            frame = page.frames
+            if len(frame) > 0:
+                print('滑块找到了')
+                print(len(frame))
+                print('聚焦滑块')
+                await frame[-2].hover('span#nc_1_n1z')
+                print('按下滑块')
+                await page.mouse.down()
+                print('移动滑块')
+                await page.mouse.move(2000, 0, {'delay': random.randint(1000, 2000), 'steps': 100})
+                print('松开滑块')
+                await page.mouse.up()
+                await asyncio.sleep(2)
+        except PageError:
+            print('没有滑块')
 
         try:
-            await page.click('div.pagination a.next')
+            await page.click('div.grid div.pagination>a.next')
         except PageError:
             print("已经爬取所有...共有" + str(sum['num']) + "条商品")
             break
 
-        try:
-            await page.waitFor(6)
-            frame = await page.Jeval('#sufei-dialog-content')
-            await frame.hover('#nc_1_n1z')
-            await page.mouse.move(2000, 0, {'delay': random.randint(1000, 2000)})
-            await page.mouse.up()
-
-            print('滑块找到了')
-        except PageError:
-            print('滑块找不到')
         print("**********************下一页**************")
     await browser.close()
 
